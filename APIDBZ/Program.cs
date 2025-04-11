@@ -14,7 +14,12 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<DragonBallDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IDragonBallRepository, DragonBallRepository>();
-builder.Services.AddHttpClient<IDragonBallApiService, DragonBallApiService>();
+builder.Services.AddHttpClient<IDragonBallApiService, DragonBallApiService>(
+    client =>
+    {
+        client.BaseAddress = new Uri("https://dragonball-api.com/api/");
+        client.DefaultRequestHeaders.Add("Accept", "application/json");
+    });
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["SecretKey"];
@@ -37,13 +42,11 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { Title = "DragonBall API", Version = "v1" });
 
-    // Configure JWT in Swagger
     var securityScheme = new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         Name = "JWT Authentication",
